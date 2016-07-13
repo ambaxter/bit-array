@@ -14,9 +14,10 @@
 
 extern crate test;
 extern crate rand;
-extern crate bit_vec;
+extern crate bit_array;
+extern crate typenum;
 
-pub use bit_vec::BitVec;
+pub use bit_array::BitArray;
 
 #[path = "../src/bench.rs"]
 mod bench;
