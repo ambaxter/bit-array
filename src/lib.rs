@@ -41,28 +41,30 @@
 //! [sieve]: http://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
 //!
 //! ```
+//! extern crate typenum;
+//! # extern crate bit_array;
 //! use bit_array::BitArray;
-//! use typenum::U1000;
+//! use typenum::{Unsigned, U10000};
 //!
-//! let max_prime = 10000;
+//! # fn main() {
 //!
 //! // Store the primes as a BitVec
 //! let primes = {
 //!     // Assume all numbers are prime to begin, and then we
 //!     // cross off non-primes progressively
-//!     let mut bv = BitArray::<u32, U1000>::from_elem(true);
+//!     let mut bv = BitArray::<u32, U10000>::from_elem(true);
 //!
 //!     // Neither 0 nor 1 are prime
 //!     bv.set(0, false);
 //!     bv.set(1, false);
 //!
-//!     for i in 2.. 1 + (max_prime as f64).sqrt() as usize {
+//!     for i in 2.. 1 + (U10000::to_usize() as f64).sqrt() as usize {
 //!         // if i is a prime
 //!         if bv[i] {
 //!             // Mark all multiples of i as non-prime (any multiples below i * i
 //!             // will have been marked as non-prime previously)
 //!             for j in i.. {
-//!                 if i * j >= max_prime {
+//!                 if i * j >= U10000::to_usize() {
 //!                     break;
 //!                 }
 //!                 bv.set(i * j, false)
@@ -83,8 +85,9 @@
 //! println!("");
 //!
 //! let num_primes = primes.iter().filter(|x| *x).count();
-//! println!("There are {} primes below {}", num_primes, max_prime);
+//! println!("There are {} primes below {}", num_primes, U10000::to_usize());
 //! assert_eq!(num_primes, 1_229);
+//! # }
 //! ```
 
 #![cfg_attr(all(test, feature = "nightly"), feature(test))]
@@ -153,10 +156,13 @@ static FALSE: bool = false;
 /// # Examples
 ///
 /// ```
+/// extern crate typenum;
+/// # extern crate bit_array;
 /// use bit_array::BitArray;
-/// use typenum::*;
+/// use typenum::U10;
 ///
-/// let mut bv = BitVec::<u32, U10>::from_elem(false);
+/// # fn main() {
+/// let mut bv = BitArray::<u32, U10>::from_elem(false);
 ///
 /// // insert all primes less than 10
 /// bv.set(2, true);
@@ -175,6 +181,7 @@ static FALSE: bool = false;
 /// bv.clear();
 /// println!("{:?}", bv);
 /// println!("total bits set to true: {}", bv.iter().filter(|x| *x).count());
+/// # }
 /// ```
 pub struct BitArray<B: BitsIn, NBits: Unsigned + NonZero>
     where NBits: Add<<B as BitsIn>::Output>,
@@ -228,9 +235,14 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
+    ///
+    /// # fn main() {
     /// let mut bv = BitArray::<u32, U8>::new();
+    /// # }
     /// ```
     pub fn new() -> Self {
         Default::default()
@@ -242,14 +254,18 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U10;
     ///
-    /// let mut bv = BitArray::<u32, U8>::from_elem(false);
+    /// # fn main() {
+    /// let mut bv = BitArray::<u32, U10>::from_elem(false);
     /// assert_eq!(bv.len(), 10);
     /// for x in bv.iter() {
     ///     assert_eq!(x, false);
     /// }
+    /// # }
     /// ```
     pub fn from_elem(bit: bool) -> Self {
         let mut bit_array = BitArray::new();
@@ -267,14 +283,18 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
     ///
+    /// # fn main() {
     /// let bv = BitArray::<u32, U8>::from_bytes(&[0b10100000, 0b00010010]);
     /// assert!(bv.eq_vec(&[true, false, true, false,
     ///                     false, false, false, false,
     ///                     false, false, false, true,
     ///                     false, false, true, false]));
+    /// # }
     /// ```
     pub fn from_bytes(bytes: &[u8]) -> Self {
         let total_bits = bytes.len().checked_mul(u8::bits()).expect("capacity overflow");
@@ -311,11 +331,15 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U5;
     ///
-    /// let bv = BitArray::<u32, U8>from_fn(5, |i| { i % 2 == 0 });
+    /// # fn main() {
+    /// let bv = BitArray::<u32, U5>::from_fn(|i| { i % 2 == 0 });
     /// assert!(bv.eq_vec(&[true, false, true, false, true]));
+    /// # }
     /// ```
     pub fn from_fn<F>(mut f: F) -> Self
         where F: FnMut(usize) -> bool
@@ -387,9 +411,12 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
     ///
+    /// # fn main() {
     /// let bv = BitArray::<u32, U8>::from_bytes(&[0b01100000]);
     /// assert_eq!(bv.get(0), Some(false));
     /// assert_eq!(bv.get(1), Some(true));
@@ -397,6 +424,7 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     ///
     /// // Can also use array indexing
     /// assert_eq!(bv[1], true);
+    /// # }
     /// ```
     #[inline]
     pub fn get(&self, i: usize) -> Option<bool> {
@@ -419,12 +447,16 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
     ///
-    /// let mut bv = BitArray::<u32, U8>::from_elem(5, false);
+    /// # fn main() {
+    /// let mut bv = BitArray::<u32, U8>::from_elem(false);
     /// bv.set(3, true);
     /// assert_eq!(bv[3], true);
+    /// # }
     /// ```
     #[inline]
     pub fn set(&mut self, i: usize, x: bool) {
@@ -442,15 +474,19 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
     ///
+    /// # fn main() {
     /// let before = 0b01100000;
     /// let after  = 0b11111111;
     ///
     /// let mut bv = BitArray::<u32, U8>::from_bytes(&[before]);
     /// bv.set_all();
     /// assert_eq!(bv, BitArray::<u32, U8>::from_bytes(&[after]));
+    /// # }
     /// ```
     #[inline]
     pub fn set_all(&mut self) {
@@ -463,15 +499,19 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
     ///
+    /// # fn main() {
     /// let before = 0b01100000;
     /// let after  = 0b10011111;
     ///
     /// let mut bv = BitArray::<u32, U8>::from_bytes(&[before]);
     /// bv.negate();
     /// assert_eq!(bv, BitArray::<u32, U8>::from_bytes(&[after]));
+    /// # }
     /// ```
     #[inline]
     pub fn negate(&mut self) {
@@ -492,9 +532,12 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
     ///
+    /// # fn main() {
     /// let a   = 0b01100100;
     /// let b   = 0b01011010;
     /// let res = 0b01111110;
@@ -504,6 +547,7 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     ///
     /// assert!(a.union(&b));
     /// assert_eq!(a, BitArray::<u32, U8>::from_bytes(&[res]));
+    /// # }
     /// ```
     #[inline]
     pub fn union(&mut self, other: &Self) -> bool {
@@ -523,9 +567,12 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
     ///
+    /// # fn main() {
     /// let a   = 0b01100100;
     /// let b   = 0b01011010;
     /// let res = 0b01000000;
@@ -535,6 +582,7 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     ///
     /// assert!(a.intersect(&b));
     /// assert_eq!(a, BitArray::<u32, U8>::from_bytes(&[res]));
+    /// # }
     /// ```
     #[inline]
     pub fn intersect(&mut self, other: &Self) -> bool {
@@ -554,9 +602,12 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
     ///
+    /// # fn main() {
     /// let a   = 0b01100100;
     /// let b   = 0b01011010;
     /// let a_b = 0b00100100; // a - b
@@ -573,6 +624,7 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     ///
     /// assert!(bvb.difference(&bva));
     /// assert_eq!(bvb, BitArray::<u32, U8>::from_bytes(&[b_a]));
+    /// # }
     /// ```
     #[inline]
     pub fn difference(&mut self, other: &Self) -> bool {
@@ -584,14 +636,18 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
     ///
-    /// let mut bv = BitArray::<u32, U8>::from_elem(5, true);
+    /// # fn main() {
+    /// let mut bv = BitArray::<u32, U8>::from_elem(true);
     /// assert_eq!(bv.all(), true);
     ///
     /// bv.set(1, false);
     /// assert_eq!(bv.all(), false);
+    /// # }
     /// ```
     pub fn all(&self) -> bool {
         let mut last_word = !B::zero();
@@ -609,11 +665,15 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U16;
     ///
-    /// let bv = BitArray::<u32, U8>::from_bytes(&[0b01110100, 0b10010010]);
+    /// # fn main() {
+    /// let bv = BitArray::<u32, U16>::from_bytes(&[0b01110100, 0b10010010]);
     /// assert_eq!(bv.iter().filter(|x| *x).count(), 7);
+    /// # }
     /// ```
     #[inline]
     pub fn iter(&self) -> Iter<B, NBits> {
@@ -626,14 +686,18 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
     ///
-    /// let mut bv = BitArray::<u32, U8>::from_elem(10, false);
+    /// # fn main() {
+    /// let mut bv = BitArray::<u32, U8>::from_elem(false);
     /// assert_eq!(bv.none(), true);
     ///
     /// bv.set(3, true);
     /// assert_eq!(bv.none(), false);
+    /// # }
     /// ```
     pub fn none(&self) -> bool {
         self.blocks().all(|w| w == B::zero())
@@ -644,14 +708,18 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
     ///
-    /// let mut bv = BitArray::<u32, U8>::from_elem(10, false);
+    /// # fn main() {
+    /// let mut bv = BitArray::<u32, U8>::from_elem(false);
     /// assert_eq!(bv.any(), false);
     ///
     /// bv.set(3, true);
     /// assert_eq!(bv.any(), true);
+    /// # }
     /// ```
     #[inline]
     pub fn any(&self) -> bool {
@@ -666,19 +734,23 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::{U3, U9};
     ///
-    /// let mut bv = BitArray::<u32, U8>::from_elem(3, true);
+    /// # fn main() {
+    /// let mut bv = BitArray::<u32, U3>::from_elem(true);
     /// bv.set(1, false);
     ///
     /// assert_eq!(bv.to_bytes(), [0b10100000]);
     ///
-    /// let mut bv = BitArray::<u32, U8>::from_elem(9, false);
+    /// let mut bv = BitArray::<u32, U9>::from_elem(false);
     /// bv.set(2, true);
     /// bv.set(8, true);
     ///
     /// assert_eq!(bv.to_bytes(), [0b00100000, 0b10000000]);
+    /// # }
     /// ```
     pub fn to_bytes(&self) -> Vec<u8> {
     	// Oh lord, we're mapping this to bytes bit-by-bit!
@@ -721,13 +793,17 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
     /// # Examples
     ///
     /// ```
+    /// extern crate typenum;
+    /// # extern crate bit_array;
     /// use bit_array::BitArray;
-    /// use typenum::*;
+    /// use typenum::U8;
     ///
+    /// # fn main() {
     /// let bv = BitArray::<u32, U8>::from_bytes(&[0b10100000]);
     ///
     /// assert!(bv.eq_vec(&[true, false, true, false,
     ///                     false, false, false, false]));
+    /// # }
     /// ```
     pub fn eq_vec(&self, v: &[bool]) -> bool {
         self.iter().zip(v.iter().cloned()).all(|(b1, b2)| b1 == b2)
