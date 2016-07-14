@@ -1,9 +1,9 @@
 // Copyright 2012-2014 The Rust Project Developers. See the COPYRIGHT
 // file at the top-level directory of this distribution and at
 // http://rust-lang.org/COPYRIGHT.
-
+//
 // Copyright 2016 The bit-array developers.
-
+//
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
@@ -22,7 +22,7 @@
 
 // (1) Be careful, most things can overflow here because the amount of bits in
 //     memory can overflow `usize`.
-// (2) Make sure that the underlying vector has no excess length:
+// (2) Make sure that the underlying array has no excess length:
 //     E. g. `nbits == 16`, `storage.len() == 2` would be excess length,
 //     because the last word isn't used at all. This is important because some
 //     methods rely on it (for *CORRECTNESS*).
@@ -31,7 +31,7 @@
 // (4) `BitSet` is tightly coupled with `BitVec`, so any changes you make in
 // `BitVec` will need to be reflected in `BitSet`.
 
-//! Collections implemented with bit vectors.
+//! Collections implemented with bit arrays.
 //!
 //! # Examples
 //!
@@ -48,7 +48,7 @@
 //!
 //! # fn main() {
 //!
-//! // Store the primes as a BitVec
+//! // Store the primes as a BitArray
 //! let primes = {
 //!     // Assume all numbers are prime to begin, and then we
 //!     // cross off non-primes progressively
@@ -172,12 +172,12 @@ static FALSE: bool = false;
 /// println!("{:?}", bv);
 /// println!("total bits set to true: {}", bv.iter().filter(|x| *x).count());
 ///
-/// // flip all values in bitvector, producing non-primes less than 10
+/// // flip all values in bitarray, producing non-primes less than 10
 /// bv.negate();
 /// println!("{:?}", bv);
 /// println!("total bits set to true: {}", bv.iter().filter(|x| *x).count());
 ///
-/// // reset bitvector to empty
+/// // reset bitarray to empty
 /// bv.clear();
 /// println!("{:?}", bv);
 /// println!("total bits set to true: {}", bv.iter().filter(|x| *x).count());
@@ -217,7 +217,7 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> Index<usize> for
     }
 }
 
-/// Computes the bitmask for the final word of the vector
+/// Computes the bitmask for the final word of the array
 fn mask_for_bits<B: BitBlock>(bits: usize) -> B {
     // Note especially that a perfect multiple of U32_BITS should mask all 1s.
     (!B::zero()) >> ((B::bits() - bits % B::bits()) % B::bits())
@@ -276,7 +276,7 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
         bit_array
     }
 
-    /// Transforms a byte-vector into a `BitVec`. Each byte becomes eight bits,
+    /// Transforms a byte-array into a `BitArray`. Each byte becomes eight bits,
     /// with the most significant bits of each byte coming first. Each
     /// bit becomes `true` if equal to 1 or `false` if equal to 0.
     ///
@@ -325,7 +325,7 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
         bit_array
     }
 
-    /// Creates a `BitVec` of the specified length where the value at each index
+    /// Creates a `BitArray` of the specified length where the value at each index
     /// is `f(index)`.
     ///
     /// # Examples
@@ -519,15 +519,15 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
         self.fix_last_block();
     }
 
-    /// Calculates the union of two bitvectors. This acts like the bitwise `or`
+    /// Calculates the union of two bitarrays. This acts like the bitwise `or`
     /// function.
     ///
-    /// Sets `self` to the union of `self` and `other`. Both bitvectors must be
+    /// Sets `self` to the union of `self` and `other`. Both bitarrays must be
     /// the same length. Returns `true` if `self` changed.
     ///
     /// # Panics
     ///
-    /// Panics if the bitvectors are of different lengths.
+    /// Panics if the bitarrays are of different lengths.
     ///
     /// # Examples
     ///
@@ -554,15 +554,15 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
         self.process(other, |w1, w2| (w1 | w2))
     }
 
-    /// Calculates the intersection of two bitvectors. This acts like the
+    /// Calculates the intersection of two bitarrays. This acts like the
     /// bitwise `and` function.
     ///
-    /// Sets `self` to the intersection of `self` and `other`. Both bitvectors
+    /// Sets `self` to the intersection of `self` and `other`. Both bitarrays
     /// must be the same length. Returns `true` if `self` changed.
     ///
     /// # Panics
     ///
-    /// Panics if the bitvectors are of different lengths.
+    /// Panics if the bitarrays are of different lengths.
     ///
     /// # Examples
     ///
@@ -589,15 +589,15 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
         self.process(other, |w1, w2| (w1 & w2))
     }
 
-    /// Calculates the difference between two bitvectors.
+    /// Calculates the difference between two bitarrays.
     ///
     /// Sets each element of `self` to the value of that element minus the
-    /// element of `other` at the same index. Both bitvectors must be the same
+    /// element of `other` at the same index. Both bitarrays must be the same
     /// length. Returns `true` if `self` changed.
     ///
     /// # Panics
     ///
-    /// Panics if the bitvectors are of different length.
+    /// Panics if the bitarrays are of different length.
     ///
     /// # Examples
     ///
@@ -660,7 +660,7 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
         }) && (last_word == mask_for_bits(NBits::to_usize()))
     }
 
-    /// Returns an iterator over the elements of the vector in order.
+    /// Returns an iterator over the elements of the array in order.
     ///
     /// # Examples
     ///
@@ -809,11 +809,11 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
         self.iter().zip(v.iter().cloned()).all(|(b1, b2)| b1 == b2)
     }
 
-    /// Returns the total number of bits in this vector
+    /// Returns the total number of bits in this array
     #[inline]
     pub fn len(&self) -> usize { NBits::to_usize() }
 
-    /// Clears all bits in this vector.
+    /// Clears all bits in this array.
     #[inline]
     pub fn clear(&mut self) {
         for w in self.storage.deref_mut() { *w = B::zero(); }
