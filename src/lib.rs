@@ -248,7 +248,7 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
         Default::default()
     }
 
-    /// Creates a `BitArray` that holds `nbits` elements, setting each element
+    /// Creates a `BitArray`, setting each element
     /// to `bit`.
     ///
     /// # Examples
@@ -1046,7 +1046,7 @@ impl<B: BitBlock + BitsIn + Default, NBits: Unsigned + NonZero> DoubleEndedItera
     }
 }
 
-impl<B: BitBlock + BitsIn + Default, NBits: Unsigned + NonZero>ExactSizeIterator for IntoIter<B, NBits> 
+impl<B: BitBlock + BitsIn + Default, NBits: Unsigned + NonZero> ExactSizeIterator for IntoIter<B, NBits> 
     where NBits: Add<<B as BitsIn>::Output>,
     <NBits as Add<<B as BitsIn>::Output>>::Output: Sub<typenum::B1>,
     <<NBits as Add<<B as BitsIn>::Output>>::Output as Sub<typenum::B1>>::Output: Div<<B as BitsIn>::Output>,
