@@ -115,6 +115,7 @@ type MatchWords<'a, B> = Chain<Enumerate<Blocks<'a, B>>, Skip<Take<Enumerate<Rep
 
 use std::ops::*;
 
+/// Traits for determing how many bits a primitive contains
 pub trait BitsIn {
     type Output;
 }
