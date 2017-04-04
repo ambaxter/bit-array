@@ -1,6 +1,6 @@
 [package]
 name = "bit-array"
-version = "0.4.3"
+version = "0.4.4"
 authors = ["Alexis Beingessner <a.beingessner@gmail.com>", "Adam Baxter"]
 license = "MIT/Apache-2.0"
 description = "A compile time sized array of bits"

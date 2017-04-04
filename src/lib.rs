@@ -301,7 +301,7 @@ impl<B: BitsIn + BitBlock + Default, NBits: Unsigned + NonZero> BitArray<B, NBit
         let total_bits = bytes.len().checked_mul(u8::bits()).expect("capacity overflow");
         let mut bit_array = BitArray::new();
         let total_array_bits = bit_array.storage.len() * B::bits();
-        assert!(total_bits < total_array_bits, "bit_array with {:?} bits cannot handle byte array of {:?} bits", total_array_bits, total_bits);
+        assert!(total_bits <= total_array_bits, "bit_array with {:?} bits cannot handle byte array of {:?} bits", total_array_bits, total_bits);
         let complete_words = bytes.len() / B::bytes();
         let extra_bytes = bytes.len() % B::bytes();
 
